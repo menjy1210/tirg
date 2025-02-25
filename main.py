@@ -23,7 +23,7 @@ import sys
 import time
 import datasets
 import img_text_composition_models
-import numpy as np
+# import numpy as np
 from tensorboardX import SummaryWriter
 import test_retrieval
 import torch
@@ -147,7 +147,10 @@ def create_model_and_optimizer(opt, texts):
     print('Invalid model', opt.model)
     print('available: imgonly, textonly, concat, tirg or tirg_lastconv')
     sys.exit()
-  model = model.cuda()
+  # model = model.cuda()
+  # model = model.to(torch.device('cpu'))
+  # device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+  # model = model.to(device)
 
   # create optimizer
   params = []
@@ -294,4 +297,79 @@ def main():
 
 
 if __name__ == '__main__':
-  main()
+  # main()
+  opt = parse_opt()
+  print('Arguments:')
+  for k in opt.__dict__.keys():
+    print('    ', k, ':', str(opt.__dict__[k]))
+
+  # logger = SummaryWriter(comment=opt.comment)
+  # print('Log files saved to', logger.file_writer.get_logdir())
+  # for k in opt.__dict__.keys():
+  #   logger.add_text(k, str(opt.__dict__[k]))
+
+  trainset, testset = load_dataset(opt)
+  model, optimizer = create_model_and_optimizer(opt, trainset.get_all_texts())
+  
+  # Ensure input is on the same device as the model
+  device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+  model = model.to(device)
+
+  '''1st try - start'''
+
+  # # ### start the training
+  # # train_loop(opt, logger, trainset, testset, model, optimizer)
+  # # logger.close()
+
+  # '''load the pretrained model'''
+  # checkpoint = torch.load('checkpoint_fashion200k.pth',map_location=torch.device('cpu'),weights_only=False)
+  # model.load_state_dict(checkpoint['model_state_dict'])
+
+  # '''
+  # # Define a sequence of transformations
+  # transform = torchvision.transforms.Compose([
+  #     transforms.Resize((256, 256)),  # Resize to 256x256
+  #     transforms.ToTensor(),           # Convert image to PyTorch tensor (C, H, W) format
+  #     transforms.Normalize(mean=[0.5], std=[0.5])  # Normalize pixel values
+  # ])
+  # # Open an image and apply transformations
+  # image = Image.open("example.jpg")
+  # transformed_image = transform(image)
+
+  # print(type(transformed_image))  # <class 'torch.Tensor'>
+  # print(transformed_image.shape)  # (3, 256, 256) for RGB images
+  # '''
+  # ### test the pretrained model
+  # # Define transformations
+  # transform = trainset.transform
+
+  # # Apply transformations
+  # image = Image.open('./fashion200k/women/dresses/casual_and_day_dresses/51727804/51727804_0.jpeg')
+  # input_tensor = transform(image)
+
+  # # Add batch dimension (model expects [Batch, C, H, W])
+  # input_batch = input_tensor.unsqueeze(0)  # Shape: [1, 3, 224, 224]
+  # input_batch = input_batch.to(device)
+
+  # # Get predictions
+  # with torch.no_grad():  # Disable gradient calculations (faster inference)
+  #     output = model(input_batch)
+
+  # print('output.shape: ',output.shape)  # Output shape: [1, 1000] (1000 classes for ImageNet)
+
+  '''1st try - end'''
+
+  '''
+  python main.py --dataset=fashion200k --dataset_path=./Fashion200k \
+  --num_iters=160000 --model=tirg --loss=batch_based_classification \
+  --learning_rate_decay_frequency=50000 --comment=f200k_tirg
+  '''
+
+  '''2nd try - start'''
+  # for name, dataset in [('train', trainset), ('test', testset)]:
+  t = test_retrieval.test(opt, model, testset)
+  print('t: ', t)
+  '''t:  [('recall_top1_correct_composition', 0.016995221027479093), ('recall_top5_correct_composition', 0.06293309438470729), ('recall_top10_correct_composition', 0.0966547192353644), ('recall_top50_correct_composition', 0.2144862604540024), ('recall_top100_correct_composition', 0.29277180406212666)]'''
+  # print(name + ': ' + metric_name + '+' + round(metric_value, 4))
+    
+  '''2nd try - end'''

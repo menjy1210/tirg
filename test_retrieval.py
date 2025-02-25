@@ -32,6 +32,7 @@ def test(opt, model, testset):
     # compute test query features
     imgs = []
     mods = []
+    print('len(test_queries): ',len(test_queries))
     for t in tqdm(test_queries):
       imgs += [testset.get_img(t['source_img_id'])]
       mods += [t['mod']['str']]
@@ -39,7 +40,8 @@ def test(opt, model, testset):
         if 'torch' not in str(type(imgs[0])):
           imgs = [torch.from_numpy(d).float() for d in imgs]
         imgs = torch.stack(imgs).float()
-        imgs = torch.autograd.Variable(imgs).cuda()
+        # imgs = torch.autograd.Variable(imgs).cuda()
+        imgs = torch.autograd.Variable(imgs).cpu()
         f = model.compose_img_text(imgs, mods).data.cpu().numpy()
         all_queries += [f]
         imgs = []
@@ -49,13 +51,15 @@ def test(opt, model, testset):
 
     # compute all image features
     imgs = []
+    print('length: ', len(testset.imgs))
     for i in tqdm(range(len(testset.imgs))):
       imgs += [testset.get_img(i)]
       if len(imgs) >= opt.batch_size or i == len(testset.imgs) - 1:
         if 'torch' not in str(type(imgs[0])):
           imgs = [torch.from_numpy(d).float() for d in imgs]
         imgs = torch.stack(imgs).float()
-        imgs = torch.autograd.Variable(imgs).cuda()
+        # imgs = torch.autograd.Variable(imgs).cuda()
+        imgs = torch.autograd.Variable(imgs).cpu()
         imgs = model.extract_img_feature(imgs).data.cpu().numpy()
         all_imgs += [imgs]
         imgs = []
@@ -74,7 +78,8 @@ def test(opt, model, testset):
       if len(imgs) > opt.batch_size or i == 9999:
         imgs = torch.stack(imgs).float()
         imgs = torch.autograd.Variable(imgs)
-        f = model.compose_img_text(imgs.cuda(), mods).data.cpu().numpy()
+        # f = model.compose_img_text(imgs.cuda(), mods).data.cpu().numpy()
+        f = model.compose_img_text(imgs.cpu(), mods).data.cpu().numpy()
         all_queries += [f]
         imgs = []
         mods = []
@@ -82,7 +87,8 @@ def test(opt, model, testset):
       if len(imgs0) > opt.batch_size or i == 9999:
         imgs0 = torch.stack(imgs0).float()
         imgs0 = torch.autograd.Variable(imgs0)
-        imgs0 = model.extract_img_feature(imgs0.cuda()).data.cpu().numpy()
+        # imgs0 = model.extract_img_feature(imgs0.cuda()).data.cpu().numpy()
+        imgs0 = model.extract_img_feature(imgs0.cpu()).data.cpu().numpy()
         all_imgs += [imgs0]
         imgs0 = []
       all_captions += [item['target_caption']]
@@ -98,6 +104,7 @@ def test(opt, model, testset):
 
   # match test queries to target images, get nearest neighbors
   nn_result = []
+  print('length2: ', all_queries.shape[0])
   for i in tqdm(range(all_queries.shape[0])):
     sims = all_queries[i:(i+1), :].dot(all_imgs.T)
     if test_queries:
