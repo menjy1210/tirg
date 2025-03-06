@@ -206,7 +206,7 @@ class Fashion200k(BaseDataset):
   def __init__(self, path, split='train', transform=None):
     super(Fashion200k, self).__init__()
 
-    self.split = split
+    self.split = split # 'train'(default) or 'test'
     self.transform = transform
     self.img_path = path + '/'
 
@@ -215,25 +215,42 @@ class Fashion200k(BaseDataset):
     from os import listdir
     from os.path import isfile
     from os.path import join
+    '''
+    f: 10 label files under 'fashion200k/labels/',
+       where each row in the label file indicates the image path
+    label_files: to decide whether this label file exists
+    '''
     label_files = [
         f for f in listdir(label_path) if isfile(join(label_path, f))
     ]
+    '''
+    pick out the labels according to 'split': whether to keep the files from test/train
+    label_files: the list of all the 'train'/'test' label_files
+    '''
     label_files = [f for f in label_files if split in f]
 
     # read image info from label files
     self.imgs = []
 
     def caption_post_process(s):
+      '''
+      process the text in the label_file
+      '''
       return s.strip().replace('.',
                                'dotmark').replace('?', 'questionmark').replace(
                                    '&', 'andmark').replace('*', 'starmark')
-
+    '''
+    find one label file, read the image info 
+    '''
     for filename in label_files:
-      print('read ' + filename)
+      # for the current label file
+      print('read: ' + filename)
       with open(label_path + '/' + filename) as f:
-        lines = f.readlines()
+        lines = f.readlines() # all the rows in the label file
+      # iterate through all the rows in the label file
       for line in lines:
-        line = line.split('	')
+        line = line.split('	') # line has three parts: image path, detection_score, text
+        # read the image as a dictionary 'img'
         img = {
             'file_path': line[0],
             'detection_score': line[1],
@@ -241,6 +258,7 @@ class Fashion200k(BaseDataset):
             'split': split,
             'modifiable': False
         }
+        # self.imgs: a list of all the images
         self.imgs += [img]
     print('Fashion200k:', len(self.imgs), 'images')
 

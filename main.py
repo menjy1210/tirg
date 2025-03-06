@@ -367,9 +367,34 @@ if __name__ == '__main__':
 
   '''2nd try - start'''
   # for name, dataset in [('train', trainset), ('test', testset)]:
-  t = test_retrieval.test(opt, model, testset)
+  print('testset: ', testset)
+  '''
+  testset:  <datasets.Fashion200k object>
+  img_path: where the pics are stored, ./
+  split = 'train'/'test'
+  transform = 
+  '''
+  t = test_retrieval.test(opt, model, trainset)
   print('t: ', t)
-  '''t:  [('recall_top1_correct_composition', 0.016995221027479093), ('recall_top5_correct_composition', 0.06293309438470729), ('recall_top10_correct_composition', 0.0966547192353644), ('recall_top50_correct_composition', 0.2144862604540024), ('recall_top100_correct_composition', 0.29277180406212666)]'''
+  '''
+  (after loading the pretrained model)t:  [
+  ('recall_top1_correct_composition', 0.016995221027479093), 
+  ('recall_top5_correct_composition', 0.06293309438470729), 
+  ('recall_top10_correct_composition', 0.0966547192353644), 
+  ('recall_top50_correct_composition', 0.2144862604540024), 
+  ('recall_top100_correct_composition', 0.29277180406212666)
+  ]
+  '''
+
+  '''
+  (before loading the pretrained model)t:  [
+  ('recall_top1_correct_composition', 0.0102), 
+  ('recall_top5_correct_composition', 0.0289), 
+  ('recall_top10_correct_composition', 0.0417), 
+  ('recall_top50_correct_composition', 0.1011), 
+  ('recall_top100_correct_composition', 0.1428)
+  ]
+  '''
   # print(name + ': ' + metric_name + '+' + round(metric_value, 4))
     
   '''2nd try - end'''
