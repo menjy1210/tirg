@@ -398,3 +398,50 @@ if __name__ == '__main__':
   # print(name + ': ' + metric_name + '+' + round(metric_value, 4))
     
   '''2nd try - end'''
+
+'''
+Terminal output:
+(base) menjiayu@MacBookAir tirg % python main.py --dataset=fashion200k --dataset_path=./Fashion200k \
+  --num_iters=160000 --model=tirg --loss=batch_based_classification \
+  --learning_rate_decay_frequency=50000 --comment=f200k_tirg
+Arguments:
+     f : 
+     comment : f200k_tirg
+     dataset : fashion200k
+     dataset_path : ./Fashion200k
+     model : tirg
+     embed_dim : 512
+     learning_rate : 0.01
+     learning_rate_decay_frequency : 50000
+     batch_size : 32
+     weight_decay : 1e-06
+     num_iters : 160000
+     loss : batch_based_classification
+     loader_num_workers : 4
+Reading dataset  fashion200k
+read: pants_train_detect_all.txt
+read: dress_train_detect_all.txt
+read: jacket_train_detect_all.txt
+read: skirt_train_detect_all.txt
+read: top_train_detect_all.txt
+Fashion200k: 172049 images
+53099 unique cations
+Modifiable images 106464
+read: top_test_detect_all.txt
+read: pants_test_detect_all.txt
+read: dress_test_detect_all.txt
+read: skirt_test_detect_all.txt
+read: jacket_test_detect_all.txt
+Fashion200k: 29789 images
+trainset size: 172049
+testset size: 29789
+Creating model and optimizer for tirg
+/opt/anaconda3/lib/python3.12/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+/opt/anaconda3/lib/python3.12/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=ResNet18_Weights.IMAGENET1K_V1`. You can also use `weights=ResNet18_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+testset:  <datasets.Fashion200k object at 0x13fa659a0>
+length2:  10000
+100%|█████████████████████████████████████████████████| 10000/10000 [00:21<00:00, 457.31it/s]
+t:  [('recall_top1_correct_composition', 0.0102), ('recall_top5_correct_composition', 0.0289), ('recall_top10_correct_composition', 0.0417), ('recall_top50_correct_composition', 0.1011), ('recall_top100_correct_composition', 0.1428)]
+'''
