@@ -28,7 +28,7 @@ def test(opt, model, testset):
   all_captions = []
   all_queries = []
   all_target_captions = []
-  if test_queries:
+  if test_queries: # if there are test queries
     # compute test query features
     imgs = []
     mods = []
@@ -42,6 +42,10 @@ def test(opt, model, testset):
         imgs = torch.stack(imgs).float()
         # imgs = torch.autograd.Variable(imgs).cuda()
         imgs = torch.autograd.Variable(imgs).cpu()
+        '''
+        extract the composed feature 
+        of the corresponding img and text in the test_query
+        '''
         f = model.compose_img_text(imgs, mods).data.cpu().numpy()
         all_queries += [f]
         imgs = []
@@ -59,13 +63,16 @@ def test(opt, model, testset):
           imgs = [torch.from_numpy(d).float() for d in imgs]
         imgs = torch.stack(imgs).float()
         imgs = torch.autograd.Variable(imgs).cpu()# imgs = torch.autograd.Variable(imgs).cuda()
+        '''
+        extract the feature of all the imgs in the dataset
+        '''
         imgs = model.extract_img_feature(imgs).data.cpu().numpy()
         all_imgs += [imgs]
         imgs = []
     all_imgs = np.concatenate(all_imgs)
     all_captions = [img['captions'][0] for img in testset.imgs]
 
-  else:
+  else:# if there are no test queries
     # use training queries to approximate training retrieval performance
     imgs0 = []
     imgs = []
@@ -114,9 +121,36 @@ def test(opt, model, testset):
   # compute recalls
   out = []
   nn_result = [[all_captions[nn] for nn in nns] for nns in nn_result]
-  for k in [1, 5, 10, 50, 100]:
+
+  print('---\n nn_result.shape:', len(nn_result),',', len(nn_result[0]))
+  '''
+  nn_result.shape: 33480 , 110
+  '''
+
+  print('---\n all_target_captions.shape:', len(all_target_captions),',', len(all_target_captions[0]))
+  '''
+  all_target_captions.shape: 33480 , 6
+  '''
+  # save the results in a txt file
+  with open('nn_results.txt', "w") as file:
+    for row in nn_result:
+        # 将每个元素转为字符串并用空格连接，最后加换行符
+        line = " ".join(map(str, row)) + "\n"
+        file.write(line)
+  file.close()
+
+  with open('all_target_captions.txt', "w") as file:
+    for row in all_target_captions:
+        # 将每个元素转为字符串并用空格连接，最后加换行符
+        line = " ".join(map(str, row)) + "\n"
+        file.write(line)
+  file.close()
+
+  for k in [1, 5, 10, 50, 100]: # recall - top k results
     r = 0.0
     for i, nns in enumerate(nn_result):
+      # i: the i-th test query
+      # nns: the sorted neighbors of the i-th query
       if all_target_captions[i] in nns[:k]:
         r += 1
     r /= len(nn_result)

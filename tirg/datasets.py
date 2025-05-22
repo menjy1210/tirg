@@ -210,7 +210,14 @@ class Fashion200k(BaseDataset):
     self.transform = transform
     self.img_path = path + '/'
 
-    # get label files for the split; label_path = path + '/labels/'
+    # get label files for the split; 
+    '''
+    train and evaluate with english labels
+    '''
+    # label_path = path + '/labels/'
+    '''
+    train and evaluate with chinese labels
+    '''
     label_path = path + '/labels_cn/'
     from os import listdir
     from os.path import isfile
